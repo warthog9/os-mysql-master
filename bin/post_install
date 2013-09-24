@@ -1,0 +1,23 @@
+#!/bin/bash -e
+
+source $OPENSHIFT_CARTRIDGE_SDK_BASH
+
+dbname=$OPENSHIFT_APP_NAME
+socket_file=$OPENSHIFT_MYSQL_DB_SOCKET
+username=$OPENSHIFT_MYSQL_DB_USERNAME
+password=$OPENSHIFT_MYSQL_DB_PASSWORD
+username_replication=$OPENSHIFT_MYSQL_DB_REPLICATION_USERNAME
+password_replication=$OPENSHIFT_MYSQL_DB_REPLICATION_PASSWORD
+
+# TODO: Should be we running mysql_secure_installation
+
+echo "drop database test;
+create database \`${dbname}\` DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;" | mysql -u root -S "$socket_file" > /dev/null || error 'Failed to create database' 188
+
+echo "                                  
+delete from user;
+grant all on *.* to '$username'@'$OPENSHIFT_MYSQL_DB_HOST' identified by '$password' with grant option;
+grant all on *.* to '$username'@'localhost' identified by '$password' with grant option;
+CREATE USER '${username_replication}'@'%' IDENTIFIED BY '${password_replication}';
+GRANT REPLICATION SLAVE ON *.* TO '${username_replication}'@'%';
+flush privileges;" | mysql -u root -S "$socket_file" mysql > /dev/null || error "Failed to setup initial root user" 187

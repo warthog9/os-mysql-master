@@ -1,0 +1,16 @@
+---
+snapshot_exclusions:
+- mysql/*
+locked_files:
+- bin/
+- bin/*
+- env/
+- env/*
+- metadata/
+- metadata/*
+- conf/
+- conf/*
+- hooks/
+- hooks/*
+processed_templates:
+- '**/*.erb'
